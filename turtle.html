@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>JavaScript Turtle Graphics - Gewitter-Thema</title>
+    <meta charset="utf-8">
+    <style>
+      /* --- Gewitter-Thema CSS --- */
+
+      /* Allgemeine Einstellungen und Schriftart */
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Dunkler, nebliger Hintergrund, der an einen Regentag erinnert */
+        background-color: #1a1a2e; /* Sehr dunkles Blau/Violett */
+        color: #e0e0e0; /* Helles Grau für Text */
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow-x: hidden; /* Verhindert horizontale Scrollbalken */
+      }
+
+      /* Wrapper für das Gesamtlayout */
+      #wrap {
+        display: flex;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+        z-index: 10; /* Stellt sicher, dass der Inhalt über dem Regen-Effekt liegt */
+      }
+
+      /* Kopfzeile */
+      h1 {
+        font-size: 2.5em;
+        color: #99ccff; /* Hellblau wie Blitze oder Regen */
+        text-shadow: 0 0 5px rgba(153, 204, 255, 0.5); /* Leichter Schein */
+        text-align: center;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      /* Spaltenlayout */
+      #midcolumn {
+        flex: 3; /* Nimmt mehr Platz ein (für die Canvas) */
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.4); /* Dunkle, durchscheinende Basis */
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); /* Tiefer Schatten */
+        margin-right: 20px;
+        border: 1px solid #334466; /* Dezente dunkle Rahmenlinie */
+      }
+
+      #rightcolumn {
+        flex: 1; /* Schmaler für Referenz/Farben */
+        padding: 20px;
+        background-color: rgba(10, 10, 20, 0.6); /* Noch dunklere Transparenz */
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        border: 1px solid #334466;
+      }
+
+      /* Überschriften in den Spalten */
+      h4 {
+        color: #b3ccff; /* Helleres Blau */
+        border-bottom: 1px solid #334466;
+        padding-bottom: 5px;
+        margin-top: 0;
+        text-transform: uppercase;
+      }
+
+      /* Canvas */
+      #turtlecanvas, #imagecanvas {
+        display: block;
+        margin: 10px auto;
+        border: 2px solid #6699ff; /* Blauer, leuchtender Rahmen */
+        box-shadow: 0 0 15px rgba(102, 153, 255, 0.7); /* Schein-Effekt */
+        background-color: #000000; /* Schwarzer Zeichenbereich */
+      }
+
+      /* Koordinatenanzeige */
+      #coords {
+        color: #66ff66; /* Grüner, technischer Text */
+        font-family: monospace;
+      }
+
+      /* Meldungs-Box (z.B. Kopiert) */
+      #message {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #004d40; /* Dunkles Grün für Systemmeldungen */
+        color: #e0f2f1;
+        border-radius: 5px;
+        transition: opacity 0.3s;
+      }
+
+      .message-hide {
+        opacity: 0;
+      }
+
+      /* Sprachreferenz */
+      code {
+        display: block;
+        background-color: #0d1a26; /* Sehr dunkler Hintergrund für Code */
+        padding: 15px;
+        border-radius: 5px;
+        font-family: 'Consolas', 'Courier New', monospace;
+        color: #7fffd4; /* Aquamarin für Code-Lesbarkeit */
+        white-space: pre-wrap;
+        line-height: 1.6;
+        border: 1px dashed #334466;
+      }
+
+      /* Links */
+      .doc-link {
+        color: #8c8cff; /* Lila/Blau für Links */
+        text-decoration: none;
+        transition: color 0.3s;
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      .doc-link:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      /* Farbauswahl-Boxen */
+      .colours {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 5px;
+        padding: 5px;
+        color: #fff;
+        text-align: center;
+        border-radius: 3px;
+        font-size: 0.9em;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s, transform 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .colours:hover {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+
+      /* --- Regen- und Gewitter-Effekte --- */
+
+      /* Simuliertes Regen-Overlay (Optional) */
+      .rain-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGUlEQVQIW2NkYGBoYGAAggABJgYGBhYAAABUAAHiOQ3QAAAAAElFTkSuQmCC'); /* Winziges, fast transparentes Streifenmuster für Regen */
+        background-size: 2px 100px;
+        opacity: 0.15; /* Sehr subtiler Effekt */
+        z-index: 5;
+        pointer-events: none; /* Klicks durchlassen */
+        /* Optional: Animation für fließenden Regen */
+        animation: rain-fall 6s linear infinite;
+      }
+
+      @keyframes rain-fall {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: 0 700px; /* Lässt die Streifen nach unten fallen */
+        }
+      }
+
+      /* Optionale Blitz-Simulation (CSS-only) */
+      .lightning-flash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        opacity: 0;
+        z-index: 20;
+        pointer-events: none;
+        /* Beispiel-Animation: Kurz aufblitzen und verschwinden */
+        /* Diese müsste dynamisch per JS ausgelöst werden, hier nur eine statische CSS-Definition */
+        /* animation: lightning 5s infinite; */
+      }
+
+      @keyframes lightning {
+        0%, 100% { opacity: 0; }
+        1% { opacity: 0.8; }
+        1.1% { opacity: 0.2; }
+        1.2% { opacity: 0.9; }
+        1.3% { opacity: 0; }
+      }
+
+      /* Responsiveness (optional, aber empfohlen) */
+      @media (max-width: 1000px) {
+        #wrap {
+          flex-direction: column; /* Stapelt die Spalten */
+        }
+        #midcolumn {
+          margin-right: 0;
+          margin-bottom: 20px;
+        }
+        #turtlecanvas, #imagecanvas {
+          width: 100%; /* Passt die Canvas-Breite an den Container an */
+          height: auto;
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="rain-overlay"></div>
+    <div id="wrap">
+      <h1>Loading Rain ...</h1>
+      
+      <div id="midcolumn">
+        <h4>Canvas <span id="coords">X: 0, Y: 0</span></h4>
+        <canvas id="turtlecanvas" width="700" height="700"></canvas>
+        <canvas id="imagecanvas" width="700" height="700" style="display:none"></canvas>
+        <span id="message" class="message-hide">Koordinaten wurden in die Zwischenablage kopiert</span>
+      </div> <div id="rightcolumn">
+        <h4>Language Reference</h4>
+        <code>
+          showGrid(step) <br/>
+          forward(distance) <br/>
+          right(angle) <br/>
+          left(angle) <br/>
+          goto(x,y) <br/>
+          penup() <br/>
+          pendown() <br/>
+          angle(angle) <br/>
+          width(width) <br/>
+          color(r,g,b) <br/> color([r,g,b]) <br/> color("#hexcolor") <br/> color("name") <br/>
+        </code>
+        <a href="https://hanumanum.github.io/js-turtle/" target="_blank" class="doc-link">Documentation »</a>
+        
+        <h4>Choose Color</h4>
+        <div class="colours" style="background-color:rgb(192, 57, 43)">Dunkelrot</div>
+        <div class="colours" style="background-color:rgb(27, 163, 156)">Meergrün</div>
+        <div class="colours" style="background-color:rgb(241, 196, 15)">Goldgelb</div>
+        <div class="colours" style="background-color:rgb(41, 128, 185)">Stahlblau</div>
+        <div class="colours" style="background-color:rgb(129, 20, 83)">Dunkellila</div>
+        <div class="colours" style="background-color:rgb(214, 137, 16)">Dunkelorange</div>
+        <div class="colours" style="background-color:rgb(52, 73, 94)">Nebelgrau</div>
+        <br>
+        <a href="http://htmlcolorcodes.com/color-chart/" target="_blank" class="doc-link">More colors »</a>
+
+      </div> </div> <script type="text/javascript" src="lib/library.js"></script>
+    <script type="text/javascript" src="functions.js"></script>
+    <script type="text/javascript" src="turtle.js"></script>
+  </body>
+</html>
