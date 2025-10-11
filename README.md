@@ -9,6 +9,9 @@ In einer im Code Festgelegten Zeit (in ms) füllt sich der Bildschirm mit einer 
 *Die UI*
 Ich habe passend zum Regen-Thema auch eine Regen-UI für turtle.js programmiert. Diese ist in css geschrieben und auch individuell anpassbar.
 
+**Ausführung**
+Zum ausführen vom Code braucht ihr die lib. von hanumanum, diese findet ihr auch auf GitHub.
+
 **Die Variablen**
 
 **let dropSpeed = 30;**
@@ -50,3 +53,7 @@ Ich habe passend zum Regen-Thema auch eine Regen-UI für turtle.js programmiert.
 **let FILL_SPACING = 5;**
 
 **let frameCount = 0;**
+
+
+**Good to know**
+Im code gibt es einige schwer verständliche bis garnicht vorhandene Variablen. Jeder der etwas daran ändert ist für seinen kaputten Tisch seber verandwortlich, wir übernehmen keine haftung. Denn der Code läuft mit LIEBE.
