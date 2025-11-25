@@ -1,17 +1,17 @@
 /// <reference path="./lib/Intellisense/js-turtle_hy.ts" />
 //DOCUMENTATION: https://hanumanum.github.io/js-turtle/
 /*
-showGrid(20);      
-forward(distance)  
-right(angle)       
-left(angle) 	   
-goto(x,y) 	       
-clear() 	       
-penup() 	       
-pendown() 	       
-reset() 	       
-angle(angle)	   
-width(width)       
+showGrid(20);      
+forward(distance)  
+right(angle)       
+left(angle)        
+goto(x,y)          
+clear()            
+penup()            
+pendown()          
+reset()            
+angle(angle)       
+width(width)       
 
 color(r,g,b)
 color([r,g,b])
@@ -48,85 +48,94 @@ color("Blue");
 width(2);
 
 function splash(drop) {
-    if (drop.splashCounter >= SPLASH_DURATION) {
-        return;
-    }
-    color("blue");
-    width(3);
-    let impactY = dropend + 5;
-    goto(drop.x - 20, impactY);
-    forward(10);
-    goto(drop.x, impactY);
-    forward(15);
-    goto(drop.x + 20, impactY);
-    forward(10);
-    drop.splashCounter++;
+    if (drop.splashCounter >= SPLASH_DURATION) {
+        return;
+    }
+    color("blue");
+    width(3);
+    let impactY = dropend + 5;
+    goto(drop.x - 20, impactY);
+    forward(10);
+    goto(drop.x, impactY);
+    forward(15);
+    goto(drop.x + 20, impactY);
+    forward(10);
+    drop.splashCounter++;
 }
 
 function combinedAnimation() {
-    
-    drawFillStep();
-    drawRainStep();
-    frameCount++; 
-    loop = requestAnimationFrame(combinedAnimation);
+    
+    drawFillStep();
+    drawRainStep();
+    frameCount++; 
+    loop = requestAnimationFrame(combinedAnimation);
 }
 
 function drawFillStep() {
-    if (fillLineCounter >= maxFillLines || frameCount % fillSpeedFactor !== 0) {
-        return; 
-    }
-    let currentY = FILL_START_Y + (fillLineCounter * FILL_SPACING * 2);
+    // NEUE LOGIK HINZUGEFÜGT: Wenn die Füllung beendet ist, starte neu.
+    if (fillLineCounter >= maxFillLines) {
+        fillLineCounter = 0; // Setze den Zähler zurück, um von vorne zu beginnen
+        clear(); // Lösche die gesamte Zeichenfläche, um die alte Füllung zu entfernen
+        // Initialisiere die Regentropfen neu, damit die Spritzer richtig funktionieren (optional, aber empfohlen)
+        allDrops = [];
+        initDrops();
+        return; // Beende den aktuellen Schritt, da wir gerade erst neu gestartet haben
+    }
 
-    color("blue");
-    width(8);
-    
-    penup();
-    goto(FILL_START_X, currentY);
-    pendown(); 
-    left(90);
-    forward(FILL_LINE_LENGTH);
-    right(90); 
-    forward(FILL_SPACING);
-    right(90);
-    forward(FILL_LINE_LENGTH);
-    left(90);
-    forward(FILL_SPACING);
-    fillLineCounter++; 
+    if (frameCount % fillSpeedFactor !== 0) {
+        return; 
+    }
+    let currentY = FILL_START_Y + (fillLineCounter * FILL_SPACING * 2);
+
+    color("blue");
+    width(8);
+    
+    penup();
+    goto(FILL_START_X, currentY);
+    pendown(); 
+    left(90);
+    forward(FILL_LINE_LENGTH);
+    right(90); 
+    forward(FILL_SPACING);
+    right(90);
+    forward(FILL_LINE_LENGTH);
+    left(90);
+    forward(FILL_SPACING);
+    fillLineCounter++; 
 }
 
 function drawRainStep() {
-    color("blue");
-    width(2);
-    
-    for (let k = 0; k < allDrops.length; k++) {
-        let drop = allDrops[k];
-        if (drop.y <= dropend) {
-            drop.y = dropstart + (k % ROWS * ROW_SPACING); 
-            drop.splashCounter = 1; 
-        }
-        penup();
-        goto(drop.x, drop.y);
-        pendown(); 
-        forward(15); 
-        if (drop.splashCounter > 0) {
-            splash(drop);
-        }
-        drop.y -= dropSpeed;
-    }
+    color("blue");
+    width(2);
+    
+    for (let k = 0; k < allDrops.length; k++) {
+        let drop = allDrops[k];
+        if (drop.y <= dropend) {
+            drop.y = dropstart + (k % ROWS * ROW_SPACING); 
+            drop.splashCounter = 1; 
+        }
+        penup();
+        goto(drop.x, drop.y);
+        pendown(); 
+        forward(15); 
+        if (drop.splashCounter > 0) {
+            splash(drop);
+        }
+        drop.y -= dropSpeed;
+    }
 }
 
 function initDrops() {
-    for (let c = 0; c < COLUMNS; c++) {
-        for (let r = 0; r < ROWS; r++) { 
-            allDrops.push({
-                x: START_X + (c * COLUMN_SPACING),
-                y: dropstart + (r * ROW_SPACING),
-                splashCounter: 0
-            });
-        }
-    }
+    for (let c = 0; c < COLUMNS; c++) {
+        for (let r = 0; r < ROWS; r++) { 
+            allDrops.push({
+                x: START_X + (c * COLUMN_SPACING),
+                y: dropstart + (r * ROW_SPACING),
+                splashCounter: 0
+            });
+        }
+    }
 }
 
 initDrops(); 
 loop = requestAnimationFrame(combinedAnimation);
-
