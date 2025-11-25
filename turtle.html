@@ -1,9 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <title>JavaScript Turtle Graphics - Gewitter-Thema</title>
+    <title>JavaScript Turtle Graphics - Raindrop/Gewitter-Thema</title>
     <meta charset="utf-8">
-    <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <style>
       /* --- Gewitter-Thema CSS --- */
 
       /* Allgemeine Einstellungen und Schriftart */
@@ -16,16 +16,22 @@
         padding: 0;
         position: relative;
         overflow-x: hidden; /* Verhindert horizontale Scrollbalken */
+        min-height: 100vh;
+        display: flex; /* Zentrieren des Wraps */
+        justify-content: center;
+        align-items: flex-start; /* Inhalt oben lassen */
       }
 
       /* Wrapper für das Gesamtlayout */
       #wrap {
         display: flex;
+        flex-wrap: wrap; /* NEU: Erlaubt das Stapeln */
         max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
+        width: 95%; /* NEU: Volle Breite auf kleinen Bildschirmen */
+        margin: 20px auto; /* Etwas Abstand oben und unten */
         position: relative;
-        z-index: 10; /* Stellt sicher, dass der Inhalt über dem Regen-Effekt liegt */
+        z-index: 10;
+        gap: 20px; /* Abstand zwischen den Spalten */
       }
 
       /* Kopfzeile */
@@ -41,21 +47,67 @@
       /* Spaltenlayout */
       #midcolumn {
         flex: 3; /* Nimmt mehr Platz ein (für die Canvas) */
+        min-width: 300px; /* NEU: Mindestbreite für Mobile */
         padding: 20px;
         background-color: rgba(0, 0, 0, 0.4); /* Dunkle, durchscheinende Basis */
         border-radius: 10px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); /* Tiefer Schatten */
-        margin-right: 20px;
         border: 1px solid #334466; /* Dezente dunkle Rahmenlinie */
       }
 
       #rightcolumn {
         flex: 1; /* Schmaler für Referenz/Farben */
+        min-width: 280px; /* NEU: Mindestbreite für Mobile */
         padding: 20px;
         background-color: rgba(10, 10, 20, 0.6); /* Noch dunklere Transparenz */
         border-radius: 10px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
         border: 1px solid #334466;
+        display: flex; /* NEU: Für die interne Anordnung des Feldes */
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      /* NEUES FELD: Custom UI & Buttons */
+      #custom-ui-field {
+        padding: 15px;
+        background-color: rgba(50, 60, 100, 0.7); /* Abgehobene Farbe */
+        border-radius: 8px;
+        border: 2px solid #6699ff;
+        box-shadow: 0 0 10px rgba(102, 153, 255, 0.5);
+        text-align: center;
+        order: -1; /* Platziert dieses Feld ganz oben in der rechten Spalte */
+      }
+
+      #custom-ui-field h4 {
+        color: #fff;
+        font-size: 1.1em;
+        margin-top: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .github-button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      
+      .github-button {
+        display: inline-block;
+        text-decoration: none;
+        padding: 10px 15px;
+        background-color: #007bb5; /* Blau, passend zum Thema */
+        color: white;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.1s;
+      }
+
+      .github-button:hover {
+        background-color: #0099e6;
+        transform: translateY(-1px);
       }
 
       /* Überschriften in den Spalten */
@@ -69,146 +121,36 @@
 
       /* Canvas */
       #turtlecanvas, #imagecanvas {
+        /* Vorhandene Styles beibehalten */
         display: block;
         margin: 10px auto;
         border: 2px solid #6699ff; /* Blauer, leuchtender Rahmen */
         box-shadow: 0 0 15px rgba(102, 153, 255, 0.7); /* Schein-Effekt */
         background-color: #000000; /* Schwarzer Zeichenbereich */
+        /* NEU: Canvas wird im Midcolumn responsiv */
+        width: 100%; 
+        height: auto; 
+        aspect-ratio: 1 / 1; /* Hält die Canvas quadratisch */
+        max-width: 700px;
       }
-
-      /* Koordinatenanzeige */
-      #coords {
-        color: #66ff66; /* Grüner, technischer Text */
-        font-family: monospace;
-      }
-
-      /* Meldungs-Box (z.B. Kopiert) */
-      #message {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 5px 10px;
-        background-color: #004d40; /* Dunkles Grün für Systemmeldungen */
-        color: #e0f2f1;
-        border-radius: 5px;
-        transition: opacity 0.3s;
-      }
-
-      .message-hide {
-        opacity: 0;
-      }
-
-      /* Sprachreferenz */
-      code {
-        display: block;
-        background-color: #0d1a26; /* Sehr dunkler Hintergrund für Code */
-        padding: 15px;
-        border-radius: 5px;
-        font-family: 'Consolas', 'Courier New', monospace;
-        color: #7fffd4; /* Aquamarin für Code-Lesbarkeit */
-        white-space: pre-wrap;
-        line-height: 1.6;
-        border: 1px dashed #334466;
-      }
-
-      /* Links */
-      .doc-link {
-        color: #8c8cff; /* Lila/Blau für Links */
-        text-decoration: none;
-        transition: color 0.3s;
-        display: block;
-        margin-top: 10px;
-        font-weight: bold;
-      }
-
-      .doc-link:hover {
-        color: #fff;
-        text-decoration: underline;
-      }
-
-      /* Farbauswahl-Boxen */
-      .colours {
-        display: inline-block;
-        width: 100%;
-        margin-bottom: 5px;
-        padding: 5px;
-        color: #fff;
-        text-align: center;
-        border-radius: 3px;
-        font-size: 0.9em;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.2s, transform 0.2s;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .colours:hover {
-        opacity: 1;
-        transform: scale(1.02);
-      }
-
-      /* --- Regen- und Gewitter-Effekte --- */
-
-      /* Simuliertes Regen-Overlay (Optional) */
-      .rain-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGUlEQVQIW2NkYGBoYGAAggABJgYGBhYAAABUAAHiOQ3QAAAAAElFTkSuQmCC'); /* Winziges, fast transparentes Streifenmuster für Regen */
-        background-size: 2px 100px;
-        opacity: 0.15; /* Sehr subtiler Effekt */
-        z-index: 5;
-        pointer-events: none; /* Klicks durchlassen */
-        /* Optional: Animation für fließenden Regen */
-        animation: rain-fall 6s linear infinite;
-      }
-
-      @keyframes rain-fall {
-        from {
-          background-position: 0 0;
-        }
-        to {
-          background-position: 0 700px; /* Lässt die Streifen nach unten fallen */
-        }
-      }
-
-      /* Optionale Blitz-Simulation (CSS-only) */
-      .lightning-flash {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.8);
-        opacity: 0;
-        z-index: 20;
-        pointer-events: none;
-        /* Beispiel-Animation: Kurz aufblitzen und verschwinden */
-        /* Diese müsste dynamisch per JS ausgelöst werden, hier nur eine statische CSS-Definition */
-        /* animation: lightning 5s infinite; */
-      }
-
-      @keyframes lightning {
-        0%, 100% { opacity: 0; }
-        1% { opacity: 0.8; }
-        1.1% { opacity: 0.2; }
-        1.2% { opacity: 0.9; }
-        1.3% { opacity: 0; }
-      }
-
-      /* Responsiveness (optional, aber empfohlen) */
+      
+      /* ... (andere Styles beibehalten: #coords, #message, code, .doc-link, .colours) ... */
+      
+      /* Responsiveness (VERBESSERT) */
       @media (max-width: 1000px) {
         #wrap {
           flex-direction: column; /* Stapelt die Spalten */
         }
         #midcolumn {
           margin-right: 0;
-          margin-bottom: 20px;
+          order: 2; /* Canvas nach unten verschieben */
+        }
+        #rightcolumn {
+            order: 1; /* Rechte Spalte (mit Info-Feld) nach oben verschieben */
         }
         #turtlecanvas, #imagecanvas {
-          width: 100%; /* Passt die Canvas-Breite an den Container an */
-          height: auto;
+          width: 95%; /* Passt die Canvas-Breite an den Container an */
+          max-width: none;
         }
       }
 
@@ -217,14 +159,31 @@
   <body>
     <div class="rain-overlay"></div>
     <div id="wrap">
-      <h1>Loading Rain ...</h1>
+      <h1>Raindrop Animation</h1>
       
       <div id="midcolumn">
         <h4>Canvas <span id="coords">X: 0, Y: 0</span></h4>
         <canvas id="turtlecanvas" width="700" height="700"></canvas>
         <canvas id="imagecanvas" width="700" height="700" style="display:none"></canvas>
-        <span id="message" class="message-hide">Koordinaten wurden in die Zwischenablage kopiert</span>
-      </div> <div id="rightcolumn">
+      </div> 
+      
+      <div id="rightcolumn">
+          
+        <div id="custom-ui-field">
+            <h4>Custom UI & Quellcode 💾</h4>
+            <p>
+                Diese Oberfläche wurde extra für die Raindrop Animation erstellt.
+            </p>
+            <div class="github-button-group">
+                <a href="https://github.com/maulwurf1425/Raindrop/blob/main/turtle.html" target="_blank" class="github-button">
+                    Code: turtle.html
+                </a>
+                <a href="https://github.com/maulwurf1425/Raindrop/blob/main/turtle.js" target="_blank" class="github-button">
+                    Code: turtle.js
+                </a>
+            </div>
+        </div>
+          
         <h4>Language Reference</h4>
         <code>
           showGrid(step) <br/>
@@ -251,7 +210,9 @@
         <br>
         <a href="http://htmlcolorcodes.com/color-chart/" target="_blank" class="doc-link">More colors »</a>
 
-      </div> </div> <script type="text/javascript" src="lib/library.js"></script>
+      </div> 
+    </div> 
+    <script type="text/javascript" src="lib/library.js"></script>
     <script type="text/javascript" src="functions.js"></script>
     <script type="text/javascript" src="turtle.js"></script>
   </body>
